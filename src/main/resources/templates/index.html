@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Banco de Imagens</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+        .gallery-img {
+            object-fit: cover;
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+        }
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <h1 class="mb-4 text-center">Banco de Imagens</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="imageForm" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" id="nome" placeholder="Seu nome" required>
+                </div>
+                <div class="col-md-5">
+                    <input type="url" class="form-control" id="url" placeholder="URL da imagem" required>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="gallery" class="row g-4"></div>
+</div>
+
+<!-- Bootstrap JS Bundle CDN -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const apiUrl = '/api/imagens';
+
+function renderGallery(imagens) {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+    imagens.forEach(img => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4';
+        col.innerHTML = `
+            <div class="card h-100">
+                <img src="${img.url}" class="gallery-img card-img-top" alt="Imagem">
+                <div class="card-body">
+                    <h5 class="card-title">${img.nome}</h5>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-sm btn-warning" onclick="editImage(${img.id}, '${img.nome}', '${img.url}')">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteImage(${img.id})">Remover</button>
+                </div>
+            </div>
+        `;
+        gallery.appendChild(col);
+    });
+}
+
+function fetchImages() {
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(renderGallery);
+}
+
+document.getElementById('imageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nome = document.getElementById('nome').value;
+    const url = document.getElementById('url').value;
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nome, url})
+    }).then(() => {
+        fetchImages();
+        this.reset();
+    });
+});
+
+function deleteImage(id) {
+    if (confirm('Tem certeza que deseja remover esta imagem?')) {
+        fetch(`${apiUrl}/${id}`, {method: 'DELETE'})
+            .then(fetchImages);
+    }
+}
+
+function editImage(id, nomeAtual, urlAtual) {
+    const nome = prompt('Editar nome:', nomeAtual);
+    if (nome === null) return;
+    const url = prompt('Editar URL:', urlAtual);
+    if (url === null) return;
+    fetch(`${apiUrl}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nome, url})
+    }).then(fetchImages);
+}
+
+fetchImages();
+</script>
+</body>
+</html>
