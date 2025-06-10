@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/images")
+@CrossOrigin(origins = "*") // Adjust the origin as needed
 public class ImageController {
 
     @Autowired
@@ -34,8 +36,8 @@ public class ImageController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Image> updateImage(@PathVariable Long id, @RequestBody Image image) {
-        Image updatedImage = imageService.updateImage(id, image);
+    public ResponseEntity<Optional<Image>> updateImage(@PathVariable Long id, @RequestBody Image image) {
+        Optional<Image> updatedImage = imageService.updateImage(id, image);
         return ResponseEntity.ok(updatedImage);
     }
 }

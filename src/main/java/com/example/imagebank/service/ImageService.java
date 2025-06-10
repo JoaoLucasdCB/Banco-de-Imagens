@@ -14,8 +14,13 @@ public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
 
+    public Optional<Image> getImageById(Long id) {
+        return imageRepository.findById(id);
+    }
+
     public Image createImage(Image image) {
-        return imageRepository.save(image);
+        Image savedImage = imageRepository.save(image);
+        return savedImage;
     }
 
     public List<Image> getAllImages() {
@@ -28,7 +33,7 @@ public class ImageService {
 
     public Optional<Image> updateImage(Long id, Image imageDetails) {
         return imageRepository.findById(id).map(image -> {
-            image.setName(imageDetails.getName());
+            image.setNome(imageDetails.getNome());
             image.setUrl(imageDetails.getUrl());
             return imageRepository.save(image);
         });
